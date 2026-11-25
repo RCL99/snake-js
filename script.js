@@ -1,15 +1,16 @@
 const FIELD_SIZE = 10;
-const field = document.createElement('div');
 
 let hasStep = true
 let score = 0
 let direction = 'right'
+let mouse;
 
 const input = document.createElement('input');
 input.disabled = true;
 input.value = `Ваши очки: ${score}`;
 document.body.appendChild(input);
 
+const field = document.createElement('div');
 field.classList.add('field');
 document.body.appendChild(field);
 
@@ -42,7 +43,6 @@ function getElementByCoordinates(x, y) {
 
 function getRandomCoordinates(mouse = false) {
     const cof = mouse ? 1 : 3;
-
     const x = Math.round(Math.random() * (FIELD_SIZE - cof) + cof);
     const y = Math.round(Math.random() * (FIELD_SIZE - 1) + 1);
     return [x, y];
@@ -62,25 +62,17 @@ function generateSnake() {
 }
 
 const snake = [];
-const coordinates = generateSnake();
-coordinates.forEach((el, index) => {
+generateSnake().forEach((el, index) => {
     const elem = getElementByCoordinates(...el);
     elem.classList.add(index ? 'snake-body' : 'snake-head');
     snake.push(elem);
 });
 
-let mouse;
-
 function createMouse() {
-    const generateMouse = () => {
+    while (!mouse || mouse.className.includes('snake')) {
         const [x, y] = getRandomCoordinates(true);
         mouse = getElementByCoordinates(x, y);
-    };
-
-    while (!mouse || mouse.className.includes('snake')) {
-        generateMouse();
     }
-
     mouse.classList.add("mouse");
 }
 
@@ -95,7 +87,6 @@ function move() {
 
     const obj = Object.values(directionDictionary).find(el => el.value === direction);
     const [newX, newY] = obj.update(x, y);
-
     const newHead = getElementByCoordinates(newX, newY);
     newHead.classList.add('snake-head');
     snake.unshift(newHead);
@@ -111,10 +102,8 @@ function move() {
         const [lastX, lastY] = [+snake.at(-1).dataset.x, +snake.at(-1).dataset.y];
         newHead.classList.remove('mouse');
         snake.push(getElementByCoordinates(lastX, lastY));
-
         score++;
         input.value = `Ваши очки ${score}`;
-
         createMouse();
     }
 
